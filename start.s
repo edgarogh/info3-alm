@@ -130,9 +130,12 @@ choose_maze_config:
 
     sub r9, r8, #1 // max choices - 1
 
+    mov r10, #0 // Pseudo-entropy
     mov r5, #0 // Selection
 
     cmc_a:
+      add r10, r10, #1
+
       mov r0, #2
       add r1, r5, #1
       bl move_cursor
@@ -141,12 +144,14 @@ choose_maze_config:
       cmp r0, #13 // Carriage return
       bne fu
       // Enter pressed
-      lsl r5, r5, #2
-      add r4, r4, r5
-      ldr r4, [r4]
-      ldr r6, =current_maze
-      str r4, [r6]
-      pop {r4-r11, pc}
+        ldr r0, =lgc_x
+        str r10, [r0]
+        lsl r5, r5, #2
+        add r4, r4, r5
+        ldr r4, [r4]
+        ldr r6, =current_maze
+        str r4, [r6]
+        pop {r4-r11, pc}
       // End enter pressed
       fu:
       cmp r0, #27 // ascii escape
