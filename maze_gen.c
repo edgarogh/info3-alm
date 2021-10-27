@@ -1,22 +1,10 @@
 #include "stdbool.h"
 #include "stdint.h"
 #include "stddef.h"
-#ifdef __x86_64__
-#include "stdio.h"
-#endif
+#include "maze_configs.h"
 
-#define maze_width 30
-#define maze_height 30
-
-#ifdef mask_width
-#undef maze_width
-#define maze_width mask_width
-#undef maze_height
-#define maze_height mask_height
-#endif
-
-uint32_t maze_width_ = maze_width;
-uint32_t maze_height_ = maze_height;
+#define max_maze_width 100
+#define max_maze_height 100
 
 uint32_t lgc_x = 1; // seed
 
@@ -50,10 +38,12 @@ typedef union {
     char all;
 } cell_paths;
 
-cell maze[maze_width * maze_height];
-bool maze_visited[maze_width * maze_height] = { false };
+cell maze[max_maze_width * max_maze_height];
+bool maze_visited[max_maze_width * max_maze_height] = { false };
 
 cell_paths cell_paths_for_cell(int x, int y) {
+    uint32_t maze_width = current_maze->width, maze_height = current_maze->height;
+
     if (x < 0 || x >= maze_width || y < 0 || y >= maze_height) return (cell_paths) {
         .all = 0b0000,
     };
@@ -70,12 +60,14 @@ cell_paths cell_paths_for_cell(int x, int y) {
     };
 }
 
-bool is_available(int x, int y) {
+bool is_available(size_t x, size_t y) {
+    uint32_t maze_width = current_maze->width, maze_height = current_maze->height;
+
     if (x < 0 || x >= maze_width || y < 0 || y >= maze_height) return false;
     return !maze_visited[x + maze_width * y];
 }
 
-cell_paths available_paths_for_cell(int x, int y) {
+cell_paths available_paths_for_cell(size_t x, size_t y) {
     return (cell_paths) {
         .n = is_available(x, y - 1),
         .e = is_available(x + 1, y),
@@ -85,35 +77,44 @@ cell_paths available_paths_for_cell(int x, int y) {
 }
 
 typedef struct { uint32_t x, y; } pos;
-pos stack[maze_width * maze_height + 1];
+pos stack[max_maze_width * max_maze_height + 1];
 
+// Called from ASM
 void maze_generate() {
+    uint32_t maze_width = current_maze->width, maze_height = current_maze->height;
+
+    uint32_t start_x = rand(maze_width);
+    uint32_t start_y = rand(maze_height);
+
+    unsigned char* mask = current_maze->custom_mask;
+    if (mask) {
+        const size_t line_bytes = (maze_width + 8 - 1) / 8;
+        for (size_t y = 0; y < maze_height; y++) {
+            for (size_t x = 0; x < maze_width; x++) {
+              size_t ai = line_bytes * y + x / 8;
+              size_t ab = 1 << (x % 8);
+              bool v = (mask[ai] & ab) == 0;
+              maze_visited[x + y * maze_width] = v;
+            }
+        }
+
+        // For custom masks, we generate the maze from a point we know is in the visible grid
+        start_x = current_maze->end_x;
+        start_y = current_maze->end_y;
+    }
+
     for (int i = 0; i < maze_width * maze_height; i++) {
         maze[i] = (cell) { .wall_east = 1, .wall_south = 1 };
     }
 
     // Initialisation de la pile
-    uint32_t start_x =
-    #ifdef mask_x_hot
-    mask_x_hot; // xbm hotspot x
-    #else
-    rand(maze_width);
-    #endif
-
-    uint32_t start_y =
-    #ifdef mask_y_hot
-    mask_y_hot; // xbm hotspot y
-    #else
-    rand(maze_height);
-    #endif
-
     stack[0] = (pos) { start_x, start_y };
 
     // Boucle de génération utilisant la pile
     for (int stack_index = 0; stack_index >= 0;) {
         char x = stack[stack_index].x, y = stack[stack_index].y;
         maze_visited[x + maze_width * y] = true;
-        int idx = x + maze_width * y;
+        size_t idx = x + maze_width * y;
         cell_paths paths = available_paths_for_cell(stack[stack_index].x, stack[stack_index].y);
         if ((paths.all & 0b1111) == 0) {
             stack_index--;
@@ -152,7 +153,6 @@ void maze_generate() {
 // par une espace (mais qui ne devrait jamais arriver)
 static const char CELL_TEXTURES[3 * 16] = " \0\0║═╚║║╔╠═╝═╩╗╣╦╬";
 
-#ifdef __arm__
 void _writec(char c);
 void print_string(char*);
 
@@ -178,16 +178,13 @@ void move_cursor(int x, int y) {
     write_number(x + 1);
     _writec('H');
 }
-#endif
 
+// Called from ASM
 void draw_cell(int x, int y, bool position, bool emphasis) {
     size_t tex = cell_paths_for_cell(x, y).all & 0b1111;
     tex *= 3;
 
-#ifdef __x86_64__
-    printf("%c%c%c", CELL_TEXTURES[tex], CELL_TEXTURES[tex+1], CELL_TEXTURES[tex+2]);
-#elif defined __arm__
-    if (x == 29 && y == 29) {
+    if (x == current_maze->end_x && y == current_maze->end_y) {
         print_string("▶");
         return;
     }
@@ -205,40 +202,8 @@ void draw_cell(int x, int y, bool position, bool emphasis) {
         }
         _writec('m');
     }
-    
+
     _writec(CELL_TEXTURES[tex+0]);
     _writec(CELL_TEXTURES[tex+1]);
     _writec(CELL_TEXTURES[tex+2]);
-#endif
 }
-
-#ifdef __x86_64__
-void show_maze() {
-    for (int y = 0; y < maze_height; y++) {
-        for (int x = 0; x < maze_width; x++) {
-            draw_cell(x, y, 0);
-        }
-        printf("\n");
-    }
-}
-
-int main() {
-    #ifdef mask_width
-    // Bits par ligne xbm
-    const size_t line_bytes = (maze_width + 8 - 1) / 8;
-    for (size_t y = 0; y < maze_height; y++) {
-        for (size_t x = 0; x < maze_width; x++) {
-            size_t ai = line_bytes * y + x / 8;
-            size_t ab = 1 << (x % 8);
-            bool v = (mask_bits[ai] & ab) == 0;
-            maze_visited[x + y * maze_width] = v;
-        }
-    }
-    #endif
-
-    maze_generate();
-    show_maze();
-
-    return 0;
-}
-#endif

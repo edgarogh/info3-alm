@@ -1,7 +1,7 @@
 # Choose your Qemu, set to your own path
 QEMU=qemu-system-arm
 
-# Choose your toolchain for ARM 
+# Choose your toolchain for ARM
 TOOLCHAIN=arm-none-eabi
 
 
@@ -27,13 +27,13 @@ KEYBOARD=-k en-us
 # UNLESS YOU KNOW WHAT YOU ARE DOING
 ####################################################################
 
-all: kernel.bin binary_tree.s binary_tree_no-O1.s
+all: kernel.bin
 
-clean: 
+clean:
 	rm -f *.o vendored/*.o kernel.elf kernel.bin
 
-kernel.bin: start.o maze_gen.o io.o print_string.o vendored/uidiv.o Makefile ldscript
-	$(TOOLCHAIN)-ld -T ldscript start.o maze_gen.o io.o print_string.o vendored/uidiv.o -o kernel.elf
+kernel.bin: start.o maze_gen.o io.o print_string.o maze_configs.o vendored/uidiv.o Makefile ldscript
+	$(TOOLCHAIN)-ld -T ldscript start.o maze_gen.o io.o print_string.o maze_configs.o vendored/uidiv.o -o kernel.elf
 	$(TOOLCHAIN)-objcopy -O binary kernel.elf kernel.bin
 
 start.o: start.s Makefile
@@ -48,11 +48,14 @@ print_string.o: print_string.s
 maze_gen.o: maze_gen.c
 	$(TOOLCHAIN)-gcc -Wall -mcpu=arm926ej-s -gstabs+ -c $^ -o $@
 
+maze_configs.o: maze_configs.c
+	$(TOOLCHAIN)-gcc -Wall -mcpu=arm926ej-s -gstabs+ -c $^ -o $@
+
 vendored/%.o: vendored/%.s
 	$(TOOLCHAIN)-as -mcpu=arm926ej-s -gstabs+ $< -o $@
 
 qemu: kernel.bin
-	$(QEMU) -M versatilepb -nographic -m 64M -gdb tcp::1234 -S $(KEYBOARD) -kernel kernel.bin 
+	$(QEMU) -M versatilepb -nographic -m 64M -gdb tcp::1234 -S $(KEYBOARD) -kernel kernel.bin
 
 gdb: kernel.bin
 	$(GDB) kernel.elf
