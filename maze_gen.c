@@ -184,12 +184,10 @@ void draw_cell(int x, int y, bool position, bool emphasis) {
     size_t tex = cell_paths_for_cell(x, y).all & 0b1111;
     tex *= 3;
 
-    if (x == current_maze->end_x && y == current_maze->end_y) {
-        print_string("▶");
-        return;
-    }
-
-    if (position) {
+    bool is_end = x == current_maze->end_x && y == current_maze->end_y;
+    if (is_end) {
+        print_string("\x1b[44m");
+    } else if (position) {
         move_cursor(x, y);
 
         _writec(27);
@@ -206,4 +204,8 @@ void draw_cell(int x, int y, bool position, bool emphasis) {
     _writec(CELL_TEXTURES[tex+0]);
     _writec(CELL_TEXTURES[tex+1]);
     _writec(CELL_TEXTURES[tex+2]);
+
+    if (is_end) {
+        print_string("\x1b[0m");
+    }
 }

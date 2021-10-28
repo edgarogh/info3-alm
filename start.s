@@ -88,7 +88,6 @@ main:
     ldr r1, =current_maze
     ldr r1, [r1]
     ldr r1, [r1, #4]
-    add r1, r1, #1
     bl move_cursor
     ldr r0, =fin
     bl print_string
