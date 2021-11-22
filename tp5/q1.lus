@@ -1,0 +1,55 @@
+function add1bit (a, b, cin : bool) returns (r, cout : bool);
+let
+    r = (a xor b) xor cin;
+
+    cout = not (
+            not (a and b)
+        and not (b and cin)
+        and not (cin and a)
+    );
+tel;
+
+-- ADD constant sur 8 bits
+
+function add8bit (A, B: bool^8; cin : bool) returns (R : bool^8; cout : bool);
+var C : bool^9;
+let
+    C[0] = cin;
+    R, C[1..8] = map<<add1bit, 8>>(A, B, C[0..7]);
+    cout = C[8];
+tel;
+
+-- ADD sur n bits
+
+function addnbit <<const n: int>> (A, B: bool^n; cin : bool) returns (R : bool^n; cout : bool);
+var C : bool^n+1;
+let
+    C[0] = cin;
+    R, C[1..n] = map<<add1bit, n>>(A, B, C[0..n-1]);
+    cout = C[n];
+tel;
+
+-- ADD sur n bits avec affichage décimal
+
+function addnbit_decimal <<const n: int>> (A, B: bool^n) returns (Ar, Br, Rr: int; cout: bool);
+var R : bool^n;
+let
+   R, cout = addnbit<<n>>(A, B, false);
+   Ar = entiernat<<n>>(A);
+   Br = entiernat<<n>>(B);
+   Rr = entiernat<<n>>(R);
+tel;
+
+function addnbit_decimal16 = addnbit_decimal<<16>>;
+
+-- AND
+
+function andnbits<<const n: int>>(x: bool^n) returns(result: bool);
+var T : bool^n+1;
+let
+    T[0] = true;
+    T[1..n] = map<<and, n>>(x, T[0..n-1]);
+    result = T[n];
+tel;
+
+function andnbits_4 = andnbits<<4>>;
