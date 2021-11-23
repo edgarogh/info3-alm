@@ -23,5 +23,8 @@ addnbit_decimal.ec: q1.lus entierv6.lus
 andnbits_4.ec: q1.lus
 	lv6 -ec -node andnbits_4 -o $@ $<
 
-flags_addnbits.ec: flags.lus
-	lv6 -ec -node addnbits_4 -o $@ $<
+flags_addnbits.ec: flags.lus entierv6.lus
+	lv6 -ec -node addnbits_4 -o $@ $^
+
+flags_subnbits.ec: flags.lus entierv6.lus
+	lv6 -ec -node subnbits_4 -o $@ $^

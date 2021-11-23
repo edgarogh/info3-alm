@@ -17,7 +17,7 @@ let
     is_zero = not T[n];
 tel;
 
-function addnbits <<const n: int>> (A, B : bool^n; re : bool) returns (R : bool^n; Z, C, N, V : bool);
+function addnbits <<const n: int>> (A, B : bool^n; re : bool) returns (R : bool^n; Z, C, N, V : bool; rr: int);
 var T: bool^n+1;
 let
     T[0] = re;
@@ -25,7 +25,24 @@ let
     Z = is_zero<<n>>(R);
     C = T[n];
     N = R[n-1];
-    V = R[n-1] xor R[n-2];
+    V = T[n] xor T[n-1];
+    rr = entierrel<<n>>(R);
 tel;
 
 function addnbits_4 = addnbits<<4>>;
+
+function subnbits <<const n: int>> (A, B: bool^n; re: bool) returns (R: bool^n; Z, C, N, V: bool; rr: int);
+var Rt: bool^n;
+var T: bool^n+1;
+let
+    T[0] = not re;
+    Rt, T[1..n] = map<<add1bit, n>>(map<<not, n>>(A), B, T[0..n-1]);
+    R = map<<not, n>>(Rt);
+    Z = is_zero<<n>>(R);
+    C = not T[n];
+    N = R[n-1];
+    V = T[n] xor T[n-1];
+    rr = entierrel<<n>>(R);
+tel;
+
+function subnbits_4 = subnbits<<4>>;
