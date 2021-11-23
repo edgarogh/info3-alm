@@ -1,0 +1,77 @@
+include "entierv6.lus"
+include "if.lus"
+
+function add1bit (a, b, cin : bool) returns (r, cout : bool);
+let
+    r = (a xor b) xor cin;
+
+    cout = not (
+            not (a and b)
+        and not (b and cin)
+        and not (cin and a)
+    );
+tel;
+
+function is_zero <<const n: int>> (A: bool^n) returns (is_zero: bool)
+var T: bool^n+1;
+let
+    T[0] = false;
+    T[1..n] = map<<or, n>>(A, T[0..n-1]);
+    is_zero = not T[n];
+tel;
+
+function addnbits <<const n : int>> (A, B : bool^n; re : bool) returns (R : bool^n; N, Z, C, V : bool);
+var T: bool^n+1;
+let
+    T[0] = re;
+    R, T[1..n] = map<<add1bit, n>>(A, B, T[0..n-1]);
+    Z = is_zero<<n>>(R);
+    C = T[n];
+    N = R[n-1];
+    V = T[n] xor T[n-1];
+tel;
+
+function const_1 <<const n : int>> () returns (res : bool^n);
+let
+    res[0] = 1;
+    res[1..n-1] = 0;
+tel;
+
+-- Réalise une addition ou une soustraction, selon le premier paramètre
+function addorsub <<const n : int>> (
+    is_sub : bool;
+    A, B : bool^n;
+    re : bool;
+) returns (
+    R: bool^n; N, Z, C, V: bool;
+);
+var Ba : bool^n;
+var _Za, Ca : bool;
+let
+    Ba = map<<xor, n>>(is_sub^n, B);
+    R, N, _Za, Ca, V = addnbits<<n>>(A, Ba, is_sub xor re);
+    Z = is_zero<<n>>(R);
+    C = is_sub xor Ca;
+tel;
+
+-- Code complet de l'ALU
+function alu <<const n : int>> (
+    uc1, uc0 : bool;
+    A, B : bool^n;
+) returns (
+    R: bool^n; N, Z, C, V: bool;
+);
+var X, Y : bool^n;
+let
+    X = if_arr<<n>>(uc0, false^n, A);
+    Y = if_arr<<n>>(uc1 or not uc0, B, A);
+    R, N, Z, C, V = addorsub<<n>>(not uc1, X, Y, uc0 and uc1);
+tel;
+
+function alu_4 (uc1, uc0 : bool; A, B : bool^4) returns (nat, rel : int; N, Z, C, V : bool);
+var R : bool^4;
+let
+    R, N, Z, C, V = alu<<4>>(uc1, uc0, A, B);
+    nat = entiernat<<4>>(R);
+    rel = entierrel<<4>>(R);
+tel;
