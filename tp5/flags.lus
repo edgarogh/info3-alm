@@ -33,15 +33,12 @@ function addnbits_4 = addnbits<<4>>;
 
 function subnbits <<const n: int>> (A, B: bool^n; re: bool) returns (R: bool^n; Z, C, N, V: bool; rr: int);
 var Rt: bool^n;
-var T: bool^n+1;
+var Ca: bool;
 let
-    T[0] = not re;
-    Rt, T[1..n] = map<<add1bit, n>>(map<<not, n>>(A), B, T[0..n-1]);
+    Rt, _, Ca, N, V, _ = addnbits<<n>>(A, B, not re);
     R = map<<not, n>>(Rt);
     Z = is_zero<<n>>(R);
-    C = not T[n];
-    N = R[n-1];
-    V = T[n] xor T[n-1];
+    C = not Ca;
     rr = entierrel<<n>>(R);
 tel;
 
