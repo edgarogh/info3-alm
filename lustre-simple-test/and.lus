@@ -1,0 +1,4 @@
+function aa (a, b: bool) returns (r : bool);
+let
+    r = a and b;
+tel
