@@ -63,7 +63,7 @@ function alu <<const n : int>> (
 );
 var X, Y : bool^n;
 let
-    X = if_arr<<n>>(uc0, false^n, A);
+    X = map<<and, n>>((not uc0)^n, A);
     Y = if_arr<<n>>(uc1 or not uc0, B, A);
     R, N, Z, C, V = addorsub<<n>>(not uc1, X, Y, uc0 and uc1);
 tel;
