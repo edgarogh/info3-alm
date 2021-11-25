@@ -56,6 +56,8 @@ fn main_result() -> Result<(), Error> {
         writeln!(&mut stdin, "{}", test.0.join(" ")).unwrap();
     }
 
+    let total_tests = tests.len();
+    let mut passing_tests = 0usize;
     let mut tests = tests.into_iter().peekable();
     for out_line in BufReader::new(stdout).lines() {
         let out_line = out_line.unwrap();
@@ -64,12 +66,13 @@ fn main_result() -> Result<(), Error> {
             let identical = results
                 .split_whitespace()
                 .zip(&expected.1)
-                .all(|(a, b)| a == *b);
+                .all(|(a, b)| b.eq_ignore_ascii_case(a));
 
             if identical {
+                passing_tests += 1;
                 eprintln!("[test OK] {:?} -> {:?}", &expected.0, &expected.1);
             } else {
-                eprintln!("[test BAD] {:?} != {:?}", results, expected);
+                eprintln!("[test BAD] {:?} != {:?}", results, expected.1);
             }
         }
 
@@ -78,6 +81,15 @@ fn main_result() -> Result<(), Error> {
         }
     }
 
+    let comment = match (passing_tests, total_tests) {
+        (0, 0) => "All tests passed (none were defined)",
+        (0, _) => "All tests failed",
+        (a, b) if a == b => "All tests passed",
+        (_, _) => "Some tests passed",
+    };
+
+    eprintln!("[test] {} ({}/{})", comment, passing_tests, total_tests);
+    eprintln!("[info] Waiting for lv6 termination");
     std::mem::drop(stdin);
     child.wait().unwrap();
 
