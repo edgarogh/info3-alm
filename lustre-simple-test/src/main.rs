@@ -1,28 +1,38 @@
+#[macro_use]
+extern crate log;
+
+use simple_logger::SimpleLogger;
 use std::io::BufRead;
 use std::io::BufReader;
 use std::process::Stdio;
 use std::process::Command;
+use std::io::ErrorKind;
 use std::io::Write;
 
 #[derive(Debug)]
 enum Error {
     MissingArgEc,
+    CannotOpenTest(std::io::Error),
+    CannotStartLv6(std::io::Error),
+    Lv6Error(std::process::ExitStatus),
 }
 
 fn main_result() -> Result<(), Error> {
+    SimpleLogger::new().init().unwrap();
+
     let mut args = std::env::args().fuse();
     let _ = args.next();
     let ec = args.next().ok_or(Error::MissingArgEc)?;
     let test = args.next().unwrap_or_else(|| {
-        eprintln!("[warning] No test file given, reading from stdin");
+        warn!("No test file given, reading from stdin");
         String::from("/dev/stdin")
     });
 
     if !ec.ends_with(".ec") && !ec.ends_with(".lus") {
-        eprintln!("[warning] Lustre input file doesn't end with .ec or .lus ({})", &ec);
+        warn!("Lustre input file doesn't end with .ec or .lus ({})", &ec);
     }
 
-    let test_file = std::fs::read_to_string(test).unwrap();
+    let test_file = std::fs::read_to_string(test).map_err(Error::CannotOpenTest)?;
     let mut test_lines = test_file.lines().enumerate();
     let mut tests = Vec::new();
     let node_name = test_lines.next().filter(|(_, n)| !n.contains(" ")).expect("first line must be a node").1;
@@ -37,7 +47,7 @@ fn main_result() -> Result<(), Error> {
         tests.push((inputs, outputs));
     }
 
-    eprintln!("[info] Running lv6");
+    info!("Running lv6");
 
     let mut child = Command::new("lv6")
         .arg("-exec")
@@ -47,7 +57,7 @@ fn main_result() -> Result<(), Error> {
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .spawn()
-        .unwrap();
+        .map_err(Error::CannotStartLv6)?;
     
     let mut stdin = child.stdin.take().unwrap();
     let stdout = child.stdout.take().unwrap();
@@ -62,7 +72,7 @@ fn main_result() -> Result<(), Error> {
     for out_line in BufReader::new(stdout).lines() {
         let out_line = out_line.unwrap();
         if let Some((_, results)) = out_line.split_once("#outs") {
-            let expected = tests.next().unwrap();
+            let expected = tests.next().expect("lv6 outputed more steps than there were tests");
             let identical = results
                 .split_whitespace()
                 .zip(&expected.1)
@@ -70,9 +80,9 @@ fn main_result() -> Result<(), Error> {
 
             if identical {
                 passing_tests += 1;
-                eprintln!("[test OK] {:?} -> {:?}", &expected.0, &expected.1);
+                info!("Test passed {:?} -> {:?}", &expected.0, &expected.1);
             } else {
-                eprintln!("[test BAD] {:?} != {:?}", results, expected.1);
+                info!("Test failed {:?} != {:?}", results, expected.1);
             }
         }
 
@@ -88,14 +98,27 @@ fn main_result() -> Result<(), Error> {
         (_, _) => "Some tests passed",
     };
 
-    eprintln!("[test] {} ({}/{})", comment, passing_tests, total_tests);
-    eprintln!("[info] Waiting for lv6 termination");
+    info!("{} ({}/{})", comment, passing_tests, total_tests);
+    info!("Waiting for lv6 termination");
     std::mem::drop(stdin);
-    child.wait().unwrap();
-
-    Ok(())
+    let lv6_status = child.wait().unwrap();
+    // TODO fix signal 13
+    if false && !lv6_status.success() {
+        Err(Error::Lv6Error(lv6_status))
+    } else {
+        Ok(())
+    }
 }
 
 fn main() {
-    main_result().unwrap();
+    if let Err(err) = main_result() {
+        match err {
+            Error::MissingArgEc => error!("usage: lustre-simple-test <circuit{{.ec|.lus}}> [test_file]"),
+            Error::CannotOpenTest(err) if err.kind() == ErrorKind::NotFound => error!("Cannot open test file: {}", err),
+            Error::CannotStartLv6(err) if err.kind() == ErrorKind::NotFound => error!("lv6 not found, is it installed ?"),
+            Error::CannotStartLv6(err) => error!("Cannot start lv6: {}", err),
+            Error::Lv6Error(status) => error!("lv6 exited with a non-null status code: {}", status),
+            err => error!("{:?}", err),
+        }
+    }
 }
