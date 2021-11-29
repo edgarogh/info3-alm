@@ -50,6 +50,7 @@ fn main_result() -> Result<(), Error> {
     info!("Running lv6");
 
     let mut child = Command::new("lv6")
+        .arg("-ec")
         .arg("-exec")
         .arg(ec)
         .arg("-n")
