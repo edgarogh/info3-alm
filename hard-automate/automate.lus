@@ -6,11 +6,11 @@ returns (nq1, nq2, s : bool);
 let
     nq1 = not (q1 xor e);
     nq2 = q2 xor e;
-    s = q1 and q2;
+    s = nq1 and nq2;
 tel;
 
 node automate (car : bool)
 returns (ec1, ec2, s : bool);
 let
-    ec1, ec2, s = transition(false -> pre ec1, false -> pre ec2, car);
+    ec1, ec2, s = transition(true -> pre ec1, true -> pre ec2, car);
 tel;

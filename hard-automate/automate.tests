@@ -1,0 +1,15 @@
+automate
+
+0 -> f t f
+0 -> t t t
+1 -> t f f
+0 -> f f f
+1 -> f t f
+1 -> f f f
+0 -> t f f
+1 -> t t t
+
+0 -> f t f
+1 -> f f f
+0 -> t f f
+1 -> t t t
