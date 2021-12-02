@@ -1,15 +1,20 @@
 automate
 
-0 -> t f f
-0 -> f f f
-1 -> f t f
-0 -> t t t
-1 -> t f f
-1 -> t t t
-0 -> f t f
-1 -> f f f
+# Premier cycle, l'automate est réinitialisé donc ça ne "compte pas"
+0 -> f
 
-0 -> t f f
-1 -> t t t
-0 -> f t f
-1 -> f f f
+# Cycles suivants, tout marche comme attendu
+
+0 -> f
+0 -> f
+1 -> f
+0 -> t
+1 -> f
+1 -> t
+0 -> f
+1 -> f
+
+0 -> f
+1 -> t
+0 -> f
+1 -> f
