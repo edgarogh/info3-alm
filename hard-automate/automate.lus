@@ -12,5 +12,5 @@ tel;
 node automate (car : bool)
 returns (ec1, ec2, s : bool);
 let
-    ec1, ec2, s = transition(true -> pre ec1, true -> pre ec2, car);
+    ec1, ec2, s = transition(false -> pre ec1, false -> pre ec2, car);
 tel;
