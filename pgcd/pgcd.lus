@@ -1,0 +1,54 @@
+include "entierv6.lus"
+include "memoire.lus"
+include "add.lus"
+include "circbase.lus"
+
+--------------------------------------------------------------------------
+-- retourne lorsque ResValide est à 1 le pgcd de deux entiers A et B sur le BusSortie
+-- l'entree des valeurs de A et B peut se faire avec Go=0 , le bus d'entree à la valeur voulue et chargeA ou charger B
+
+node pgcd <<const n:int>> (Go:bool; BusEntree:bool^n; chargerA,chargerB:bool)
+returns (BusSortie:bool^n; ResValide:bool; Aint,Bint : int);
+var entA, entB, A, B, AmoinsB, BmoinsA :bool^n;
+CarryAB, CarryBA, C, Z, enableA, enableB:bool;
+let
+    --Memorisation de A et B
+    A= registren<<n>>(entA,enableA);
+    B= registren<<n>>(entB,enableB);
+
+    --Conditions de chargement de A et B
+    enableA=(Go and not C and not Z) or chargerA;
+    enableB=(Go and not (not CarryBA) and not (ZEROn<<n>>(BmoinsA))) or chargerB;
+
+    --Calcul de A - B
+    (AmoinsB,CarryAB)= ADDnbits<<n>>(A,map <<not;n>>(B), true);
+    C=not CarryAB; -- car on utilise un addtionneur et C= vrai emprunt de la soustraction
+
+    --Z=1 si A=B
+    Z=ZEROn<<n>>(AmoinsB);
+    ResValide=Z; -- Resultat valide si A=B
+
+    --Calcul de B - A
+    (BmoinsA,CarryBA)= ADDnbits<<n>>(B,map <<not;n>>(A), true);
+
+    --si chargerA alors A=busentree sinon A=AmoinsB avec la condition (Go and not C and not Z) or chargerA;
+    entA=mux21<<n>>(BusEntree,AmoinsB,chargerA);
+    --si chargerB alors B=busentree sinon B=BmoinsA avec la condition (Go and not CBis and not ZBis) or chargerB;
+    entB=mux21<<n>>(BusEntree,BmoinsA,chargerB);
+    Aint= entiernat<<n>>(A);
+    Bint= entiernat<<n>>(B);
+    BusSortie= A;
+tel;
+
+---------------------------------------------------------------------------------
+--------affiche le resultat en decimal----------------------------
+node pgcdint<<const n:int>> (Go:bool; BusEntree:bool^n; chargerA,chargerB:bool)
+returns (Res:int; ResValide:bool;Aint,Bint : int);
+var BusSortie:bool^n;
+let
+    (BusSortie,ResValide,Aint,Bint)=pgcd<<n>>(Go,BusEntree,chargerA,chargerB);
+    Res= entiernat<<n>>(BusSortie);
+tel;
+---------------------------------------------------------------------------------
+--------simulation sur 8 bits----------------------------
+node pgcdfin=pgcdint<<8>>;
