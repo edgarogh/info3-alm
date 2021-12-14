@@ -1,0 +1,34 @@
+include "circbase.lus"
+include "memoire.lus"
+
+
+
+--------------------------------------------------------------------------
+-- Partie controle permettant de calculer un pgcd
+--
+
+node pgcdPC (reset,Lancer,notCnotZ, notZ:bool)
+returns (ChA, ChB, SBus1, SBus2, SEntreeRes, FinCalcul :bool);
+var Etat1,Etat2,Etat3:bool;
+EtatSuiv1, EtatSuiv2, EtatSuiv3 :bool;
+
+let
+--réalisation codage un parmi n
+--Memorisation de l'etat courant
+Etat1=bascule(EtatSuiv1,true,false,reset); --etat initial
+Etat2=bascule(EtatSuiv2,true,reset,false);
+Etat3=bascule(EtatSuiv3,true,reset,false);
+--...
+
+--Calcul de l'état suivant
+EtatSuiv1= Etat6 or Etat1 and not Lancer; --par exemple
+--...
+
+
+--Calcul des sorties
+ChA= Etat1 or Etat2;  --ce n'est qu'un exemple
+--...
+
+tel;
+
+

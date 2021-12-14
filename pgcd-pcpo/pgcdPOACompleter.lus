@@ -1,0 +1,63 @@
+include "circbase.lus"
+include "memoire.lus"
+
+
+-------------------------------------------------------------------------
+----------soustracteur 1 bit -------------------------------
+function SUB1bit (a,b,c : bool)
+returns (r,cs: bool);
+let
+r = a xor b xor c;
+cs = ((not a) and b) or ((not a) and c) or (b and c);
+tel;
+---------------------
+--------------------------------------------------------------------------
+--Soustracteur n bits
+--cn est le dernier emprunt de la soustraction
+--z est le flags habituel Z=1 si le resultat est nul
+function SUBnbits <<const n : int>> (a,b : bool^n ; c0 : bool)
+returns (r : bool^n ; cn,z : bool;);
+var c : bool^(n+1);
+let
+c[0] = c0;
+(r , c[1..n]) = map <<SUB1bit ; n>> (a, b, c[0..(n-1)]);
+cn = c[n];
+z= ZEROn<<n>>(r);
+tel;
+
+node SUBnbitsfin = SUBnbits<<4>>;
+--------------------------------------------------------------------------
+-- Partie operative permettant de calculer un pgcd
+--
+
+node POpgcd <<const n:int>> (chA,chB,SBus1,SBus2,SEntreeRes:bool; BusEntree:bool^n)
+returns (notCnotZ, notZ:bool; BusSortie:bool^n);
+var bus1, bus2, A, B, BusResultat,BusChargement :bool^n;
+C,Z:bool;
+
+let
+--Memorisation de A et B
+A= registren<<n>>(BusChargement,chA);
+B= registren<<n>>(BusChargement,chB);
+
+--Soustracteur via les bus 1 et 2
+...
+
+--Calcul des compte-rendus
+notCnotZ= (not C) and (not Z);
+notZ= not Z;
+
+bus1= mux21<<n>>(B,A,SBus1);
+bus2= mux21<<n>>(B,A,SBus2);
+-- attention au fonctionnement de mux21
+
+--Bus de Sortie
+...
+
+--Bus de chargement
+...
+
+tel;
+
+--------simulation sur 8 bits----------------------------
+node POpgcdfin=POpgcd<<8>>;

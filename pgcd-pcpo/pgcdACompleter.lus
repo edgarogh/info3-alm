@@ -1,0 +1,38 @@
+include "entierv6.lus"
+include "add.lus"
+include "pgcdPO.lus"
+--include "pgcdPC.lus"
+
+
+--------------------------------------------------------------------------
+-- retourne lorsque FinCalcul est à 1 le pgcd de deux entiers A et B sur le BusSortie
+-- l'entree des valeurs de A et B peut se faire avec Lancer=0 , le bus d'entree à la valeur voulue et les signaux ChAExt ou ChBExt
+--le calcul est demarrer en mettant le signal Lancer à 1
+
+node pgcd <<const n:int>> ( BusEntree:bool^n; reset,Lancer,ChAExt,ChBExt:bool)
+returns (BusSortie:bool^n; FinCalcul:bool);
+var ChAPO,ChBPO,ChA,ChB,SBus1,SBus2,SEntreeRes, notCnotZ, notZ:bool;
+
+let
+----calcul des ChAPO et ChBPO
+-- ChAPO=--;
+--ChBPO=--;
+
+(ChA, ChB, SBus1, SBus2, SEntreeRes, FinCalcul)=pgcdPC (reset,Lancer,notCnotZ, notZ);
+(notCnotZ, notZ, BusSortie)=pgcdPO<<n>>(ChAPO,ChBPO,SBus1,SBus2,SEntreeRes, BusEntree);
+
+tel;
+
+---------------------------------------------------------------------------------
+--------affiche le resultat en decimal----------------------------
+node pgcdint<<const n:int>> ( BusEntree:bool^n; reset,Lancer,chargerA,chargerB:bool)
+returns (Res:int; FinCalcul:bool);
+var BusSortie:bool^n;
+
+let
+(BusSortie,FinCalcul)=pgcd<<n>>(BusEntree, reset, Lancer, chargerA, chargerB);
+Res= entiernat<<n>>(BusSortie);
+tel;
+---------------------------------------------------------------------------------
+--------simulation sur 8 bits----------------------------
+node pgcdfin=pgcdint<<8>>;
