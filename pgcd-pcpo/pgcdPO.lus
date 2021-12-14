@@ -30,33 +30,32 @@ node SUBnbitsfin = SUBnbits<<4>>;
 --------------------------------------------------------------------------
 -- Partie operative permettant de calculer un pgcd
 --
-node POpgcd <<const n:int>> (chA, chB, SBus1, SBus2, SEntreeRes : bool ; BusEntree : bool^n)
+node pgcdPO <<const n:int>> (chA, chB, SBus1, SBus2, SEntreeRes : bool ; BusEntree : bool^n)
 returns (notCnotZ, notZ : bool; BusSortie : bool^n);
 var bus1, bus2, A, B, BusResultat, BusChargement : bool^n;
 var C, Z : bool;
 let
     --Memorisation de A et B
-    A = registren<<n>>(BusChargement,chA);
-    B = registren<<n>>(BusChargement,chB);
+    A = registren<<n>>(BusChargement, chA);
+    B = registren<<n>>(BusChargement, chB);
 
     --Soustracteur via les bus 1 et 2
-    ...
+    BusResultat, C, Z = SUBnbits<<n>>(bus1, bus2, false);
 
     --Calcul des compte-rendus
     notCnotZ = (not C) and (not Z);
     notZ = not Z;
 
-    bus1 = mux21<<n>>(B,A,SBus1);
-    bus2 = mux21<<n>>(B,A,SBus2);
+    bus1 = mux21<<n>>(B, A, SBus1);
+    bus2 = mux21<<n>>(B, A, SBus2);
     -- attention au fonctionnement de mux21
 
     --Bus de Sortie
-    ...
+    BusSortie = A;
 
     --Bus de chargement
-    ...
-
+    BusChargement = mux21<<n>>(BusEntree, BusResultat, SEntreeRes);
 tel;
 
 --------simulation sur 8 bits----------------------------
-node POpgcdfin=POpgcd<<8>>;
+node POpgcdfin=pgcdPO<<8>>;

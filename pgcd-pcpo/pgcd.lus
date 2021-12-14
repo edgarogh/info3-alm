@@ -1,7 +1,7 @@
 include "entierv6.lus"
 include "add.lus"
 include "pgcdPO.lus"
---include "pgcdPC.lus"
+include "pgcdPC.lus"
 
 --------------------------------------------------------------------------
 -- retourne lorsque FinCalcul est à 1 le pgcd de deux entiers A et B sur le BusSortie
@@ -12,9 +12,9 @@ returns (BusSortie : bool^n ; FinCalcul : bool);
 var ChAPO, ChBPO, ChA, ChB, SBus1, SBus2, SEntreeRes, notCnotZ, notZ : bool;
 let
     ----calcul des ChAPO et ChBPO
-    -- ChAPO=--;
-    --ChBPO=--;
-    (ChA, ChB, SBus1, SBus2, SEntreeRes, FinCalcul) = pgcdPC (reset, Lancer, notCnotZ, notZ);
+    ChAPO = ChA or ChAExt;
+    ChBPO = ChB or ChBExt;
+    (ChA, ChB, SBus1, SBus2, SEntreeRes, FinCalcul) = pgcdPC(reset, Lancer, notCnotZ, notZ);
     (notCnotZ, notZ, BusSortie) = pgcdPO<<n>>(ChAPO, ChBPO, SBus1, SBus2, SEntreeRes, BusEntree);
 tel;
 
@@ -24,10 +24,10 @@ node pgcdint <<const n:int>> (BusEntree : bool^n ; reset, Lancer, chargerA, char
 returns (Res : int ; FinCalcul : bool);
 var BusSortie : bool^n;
 let
-    (BusSortie, FinCalcul)  =pgcd<<n>>(BusEntree, reset, Lancer, chargerA, chargerB);
+    (BusSortie, FinCalcul) = pgcd<<n>>(BusEntree, reset, Lancer, chargerA, chargerB);
     Res = entiernat<<n>>(BusSortie);
 tel;
 
 ---------------------------------------------------------------------------------
 --------simulation sur 8 bits----------------------------
-node pgcdfin=pgcdint<<8>>;
+node pgcdfin = pgcdint<<8>>;
