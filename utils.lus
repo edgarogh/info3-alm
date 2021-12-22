@@ -1,0 +1,17 @@
+function lsl <<const n : int>>(A:bool^n) 
+returns (B :bool^n);
+
+let
+    B[0] = false;
+    B[1..n-1] = A[0..n-2];
+tel;
+
+function lsr <<const n : int>>(A:bool^n) 
+returns (B :bool^n);
+
+let
+    B[n-1] = false;
+    B[0..n-2] = A[1..n-1];
+tel;
+
+function utils = lsr<<4>>;

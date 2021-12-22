@@ -1,0 +1,123 @@
+include "UALDivisionAffDecV6.lus"
+include "memoire.lus"
+include "utils.lus"
+
+
+-- mux 1st operand----------------------
+function mux_1op (A,B,C,D : bool; var1,var2 : bool) returns (X : bool);
+let
+    X = (A and not var1 and not var2) 
+    or (B and not var1 and var2) 
+    or (C and var1 and not var2)
+    or (D and var1 and var2);
+tel;
+
+function mux_1opn <<const n : int>>(A,B,C,D : bool^n; var1,var2 : bool) returns (X : bool^n);
+let
+    X = map <<mux_1op;n>>(A,B,C,D,var1^n,var2^n);
+tel;
+----------------------------------------
+
+
+-- mux 2nd operand-----------------------
+function mux_2op (A,B : bool; var3 : bool) returns (X : bool)
+let
+    X = (A and not var3)
+    or (B and var3);
+tel;
+
+function mux_2opn <<const n : int>>(A,B : bool^n; var3 : bool) returns (X : bool^n)
+let
+    X = map <<mux_2op;n>>(A,B,var3^n); 
+tel;
+-----------------------------------------
+
+
+-- mux for b----------------------------
+function mux_3b (A, B, C : bool; lsl, uc0, uc1 : bool) returns (X : bool)
+let
+    X = (A and not uc0)
+    or (A and not uc1)
+    or (B and uc0 and uc1 and lsl)
+    or (C and uc0 and uc1 and not lsl);
+tel;
+
+function mux_bn <<const n : int>>(A, B, C: bool^n; lsl, uc0, uc1 : bool) returns (X : bool^n)
+let
+    X = map <<mux_3b;n>>(A,B,C,lsl^n,uc0^n,uc1^n); 
+tel;
+
+function mux_b <<const n : int>>(A : bool^n; lsl, uc0, uc1 : bool) returns (X : bool^n)
+var Y, Z : bool^n;
+let
+    Y = lsl<<n>>(A);
+    Z = lsr<<n>>(A);
+    X = mux_bn<<n>>(A, Y, Z, lsl, uc0, uc1);
+tel;
+-------------------------------------
+
+
+-- mux for q-------------------------
+function mux_2q (A, B : bool; uc0, uc1 : bool) returns (X : bool)
+let
+    X = (A and not uc0)
+    or (A and not uc1)
+    or (B and uc0 and uc1);
+tel;
+
+function mux_2qn <<const n : int>>(A,B : bool^n; uc0, uc1 : bool) returns (X : bool^n)
+let
+    X = map <<mux_2q;n>>(A,B,uc0^n,uc1^n); 
+tel;
+
+function mux_q <<const n : int>>(A : bool^n; uc0, uc1 : bool) returns (X : bool^n)
+var Y : bool^n;
+let
+    Y = lsl<<n>>(A);
+    X = mux_2qn<<n>>(A, Y, uc0, uc1);
+tel;
+-------------------------------------
+
+
+--muxfin-----------------------------
+function mux(A, B, cond : bool;) returns (X : bool)
+let
+    X = (A and not cond)
+    or (B and cond);
+tel;
+
+function muxfin <<const n : int>>(A, B : bool^n; cond : bool) returns (X : bool^n)
+let
+    X = map <<mux;n>>(A,B,cond^n); 
+tel;
+------------------------------------
+
+
+------------------------------------
+node PO <<const n :int>>  (uc0, uc1 : bool; lsl : bool; var1, var2, var3: bool; chA, chQ, chR, chB, chK : bool; Bus_Entree:bool ^n; direct_input : bool)
+	returns (Z, C :bool; A, Q, R, B, K, sortie_UAL:bool^n);
+
+	var N,V :bool;
+	var Bus_op1 : bool^n;
+	var Bus_op2 : bool^n;
+	var Bus_Resultat : bool^n;
+
+let
+	A = registren<<n>>(Bus_Resultat, chA, false);
+	B = registren<<n>>(Bus_Resultat, chB, false);
+	Q = registren<<n>>(Bus_Resultat, chQ, false);
+	R = registren<<n>>(Bus_Resultat, chR, false);
+	K = registren<<n>>(Bus_Resultat, chK, false);
+
+	Bus_op1 = mux_1opn<<n>>(mux_q<<n>>(Q, uc0, uc1), R, mux_b<<n>>(B, lsl, uc0, uc1), K, var1, var2);
+	Bus_op2 = mux_2opn<<n>>(B, A, var3);
+
+	(Z,N,V,C, sortie_UAL)= ual_n_bits<<n>>(Bus_op1, Bus_op2, uc1, uc0);
+
+    Bus_Resultat = muxfin<<n>>(sortie_UAL, Bus_Entree, direct_input);
+tel;
+-------------------------------
+
+
+-- MAIN
+node po_main = PO<<4>>;
