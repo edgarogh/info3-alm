@@ -1,0 +1,9 @@
+function if_bool (cond : bool; t, e : bool) returns (res : bool);
+let
+    res = (cond and t) or (not cond and e);
+tel;
+
+function if_arr <<const n : int>> (cond : bool; t, e : bool^n) returns (res : bool^n);
+let
+    res = map<<if_bool, n>>(cond^n, t, e);
+tel;

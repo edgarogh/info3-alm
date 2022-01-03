@@ -1,0 +1,8 @@
+[package]
+name = "lustre-simple-test"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+log = "0.4.14"
+simple_logger = { version = "1.15.0", default-features = false, features = ["colors", "stderr"] }

@@ -1,0 +1,37 @@
+include "memoire.lus"
+
+-- Trouvé à partir d'un tableau de kernaugh
+function transition (q1, q2, e : bool)
+returns (nq1, nq2, s : bool);
+let
+    nq1 = not (q1 xor e);
+    nq2 = q2 xor e;
+    s = nq1 and nq2;
+tel;
+
+node automate_bascules (reset, car : bool)
+returns (ec1, ec2, s : bool);
+var es1, es2 : bool;
+let
+    ec1 = bascule(es1, true, reset, false);
+    ec2 = bascule(es2, true, reset, false);
+
+    es1, es2, s = transition(ec1, ec2, car);
+tel;
+
+-- Renvoie true au premier cycle, puis false indéfiniment.
+-- Utile pour initialiser un automate.
+node reset_once (_ignored: bool)
+returns (reset : bool);
+var counter : bool;
+let
+    counter = false -> (pre reset or pre counter);
+    reset = not counter;
+tel;
+
+node automate (car : bool)
+returns (s : bool);
+var _x, _y : bool;
+let
+    _x, _y, s = automate_bascules(reset_once(false), car);
+tel;

@@ -1,0 +1,20 @@
+automate
+
+# Premier cycle, l'automate est réinitialisé donc ça ne "compte pas"
+0 -> f
+
+# Cycles suivants, tout marche comme attendu
+
+0 -> f
+0 -> f
+1 -> f
+0 -> t
+1 -> f
+1 -> t
+0 -> f
+1 -> f
+
+0 -> f
+1 -> t
+0 -> f
+1 -> f

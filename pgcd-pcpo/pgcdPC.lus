@@ -1,0 +1,36 @@
+include "circbase.lus"
+include "memoire.lus"
+
+--------------------------------------------------------------------------
+-- Partie controle permettant de calculer un pgcd
+--
+node pgcdPC (reset, Lancer, notCnotZ, notZ : bool)
+returns (ChA, ChB, SBus1, SBus2, SEntreeRes, FinCalcul : bool);
+var Etat1Init, Etat2Cond, Etat3, Etat4A, Etat5B, Etat6End : bool;
+var EtatSuiv1, EtatSuiv2, EtatSuiv3, EtatSuiv4, EtatSuiv5, EtatSuiv6 : bool;
+let
+    --réalisation codage un parmi n
+    --Memorisation de l'etat courant
+    Etat1Init = bascule(EtatSuiv1, true, false, reset); --etat initial
+    Etat2Cond = bascule(EtatSuiv2, true, reset, false);
+    Etat3 = bascule(EtatSuiv3, true, reset, false);
+    Etat4A = bascule(EtatSuiv4, true, reset, false);
+    Etat5B = bascule(EtatSuiv5, true, reset, false);
+    Etat6End = bascule(EtatSuiv6, true, reset, false);
+
+    --Calcul de l'état suivant
+    EtatSuiv1 = (Etat6End) or (Etat1Init and not Lancer); --par exemple
+    EtatSuiv2 = (Etat1Init and Lancer) or (Etat4A) or (Etat5B);
+    EtatSuiv3 = (Etat2Cond and notZ);
+    EtatSuiv4 = (Etat3 and notCnotZ);
+    EtatSuiv5 = (Etat3 and not notCnotZ);
+    EtatSuiv6 = (Etat2Cond and not notZ);
+
+    --Calcul des sorties
+    ChA = Etat4A;
+    ChB = Etat5B;
+    SBus1 = Etat5B;
+    SBus2 = Etat2Cond or Etat3 or Etat4A;
+    SEntreeRes = Etat1Init;
+    FinCalcul = Etat6End;
+tel;
