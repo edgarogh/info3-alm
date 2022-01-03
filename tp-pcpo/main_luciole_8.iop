@@ -1,0 +1,59 @@
+module "main_luciole_8"
+inputs
+   input_0 : bool;
+   input_1 : bool;
+   input_2 : bool;
+   input_3 : bool;
+   input_4 : bool;
+   input_5 : bool;
+   input_6 : bool;
+   input_7 : bool;
+   On : bool;
+   chQExt : bool;
+   chRExt : bool;
+   chAExt : bool;
+   chBExt : bool;
+   chKExt : bool;
+outputs
+   A : int;
+   Q : int;
+   R : int;
+   B : int;
+   K : int;
+   output : int;
+   s_char : bool;
+   s_b1 : bool;
+   s_b1a : bool;
+   s_b1b : bool;
+   s_b2 : bool;
+   s_b2a : bool;
+   s_b2b : bool;
+   s_b2c : bool;
+   s_b2if : bool;
+   s_b2ifa : bool;
+   s_b2ifb : bool;
+   s_done : bool;
+   C : bool;
+   Z : bool;
+panels
+   inpanel = col {
+      line { $input_0 $input_1 $input_2 $input_3 
+      }
+      line { $input_4 $input_5 $input_6 $input_7
+      }
+      line { $chQExt $chRExt $chAExt $chBExt $chKExt
+      }
+      line { $On }
+   };
+   outpanel = col {
+      line { $A $Q $R $B $K
+      }
+      line { $output $s_char $C $Z
+      }
+      line { $s_b1 $s_b1a $s_b1b $s_b2 $s_b2a $s_b2b 
+      }
+      line { $s_b2c $s_b2if $s_b2ifa $s_b2ifb $s_done
+      }
+   };
+   top = line { $inpanel $outpanel
+   };

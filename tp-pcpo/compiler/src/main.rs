@@ -23,10 +23,10 @@ impl ExpressionType {
     pub fn flags(self) -> Option<&'static str> {
         match self {
             Self::Eq => None,
-            Self::Gt => Some("!C | Z"),
+            Self::Le => Some("!C | Z"),
 	    Self::Lt => Some("!C"),
 	    Self::Ge => Some("C"),
-            Self::Le => Some("C & !Z"),
+            Self::Gt => Some("C & !Z"),
         }
     }
 }
@@ -46,8 +46,8 @@ impl Operator {
     pub fn codes(self) -> &'static [&'static str] {
         match self {
             Self::Sub => &[],
-            Self::Incr => &["uc0"],
-            Self::Decr => &["uc1"],
+            Self::Incr => &["uc1"],
+            Self::Decr => &["uc0"],
             Self::Mul2 => &["uc0", "uc1", "lsl"],
             Self::Div2 => &["uc0", "uc1"],
         }

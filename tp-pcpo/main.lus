@@ -1,0 +1,54 @@
+include "pc.lus"
+include "po.lus"
+
+node main <<const n : int>> (
+    input : bool^n;
+    reset, On : bool;
+    chQExt, chRExt, chAExt, chBExt, chKExt : bool;
+) returns (
+    A, Q, R, B, K : bool^n;
+    output : bool^n;
+    s: state;
+    C, Z : bool;
+);
+var uc0, uc1, lsl, var1, var2, var3, chQ, chR, chA, chB, chK : bool;
+var chQIn, chRIn, chAIn, chBIn, chKIn : bool;
+let
+    chQIn = chQ or chQExt;
+    chRIn = chR or chRExt;
+    chAIn = chA or chAExt;
+    chBIn = chB or chBExt;
+    chKIn = chK or chKExt;
+    uc0, uc1, lsl, var1, var2, var3, chQ, chR, chA, chB, chK, s = pc(reset, On, C, Z);
+    Z, C, A, Q, R, B, K, output = po<<n>>(
+        uc0, uc1,
+        lsl,
+        var1, var2, var3,
+        chAIn, chQIn, chRIn, chBIn, chKIn,
+        input, not On
+    );
+tel;
+
+node main_luciole <<const n : int>> (
+    input : bool^n;
+    On : bool;
+    chQExt, chRExt, chAExt, chBExt, chKExt : bool;
+) returns (
+    A, Q, R, B, K : int;
+    output : int;
+    s : state;
+    C, Z : bool;
+);
+var A_bin, Q_bin, R_bin, B_bin, K_bin : bool^n;
+var output_bin : bool^n;
+let
+    A_bin, Q_bin, R_bin, B_bin, K_bin, output_bin, s, C, Z = main<<n>>(input, true fby false, On, chQExt, chRExt, chAExt, chBExt, chKExt);
+    A = entiernat<<n>>(A_bin);
+    Q = entiernat<<n>>(Q_bin);
+    R = entiernat<<n>>(R_bin);
+    B = entiernat<<n>>(B_bin);
+    K = entiernat<<n>>(K_bin);
+    output = entiernat<<n>>(output_bin);
+tel;
+
+node main_luciole_8 = main_luciole<<8>>;

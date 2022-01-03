@@ -1,0 +1,72 @@
+module "po_4"
+inputs
+   uc0 : bool;
+   uc1 : bool;
+   lsl : bool;
+   var1 : bool;
+   var2 : bool;
+   var3 : bool;
+   chA : bool;
+   chQ : bool;
+   chR : bool;
+   chB : bool;
+   chK : bool;
+   Bus_Entree_0 : bool;
+   Bus_Entree_1 : bool;
+   Bus_Entree_2 : bool;
+   Bus_Entree_3 : bool;
+   direct_input : bool;
+outputs
+   Z : bool;
+   C : bool;
+   A_0 : bool;
+   A_1 : bool;
+   A_2 : bool;
+   A_3 : bool;
+   Q_0 : bool;
+   Q_1 : bool;
+   Q_2 : bool;
+   Q_3 : bool;
+   R_0 : bool;
+   R_1 : bool;
+   R_2 : bool;
+   R_3 : bool;
+   B_0 : bool;
+   B_1 : bool;
+   B_2 : bool;
+   B_3 : bool;
+   K_0 : bool;
+   K_1 : bool;
+   K_2 : bool;
+   K_3 : bool;
+   sortie_UAL_0 : bool;
+   sortie_UAL_1 : bool;
+   sortie_UAL_2 : bool;
+   sortie_UAL_3 : bool;
+panels
+   inpanel = col {
+      line { $uc0 $uc1 $lsl $var1 $var2 $var3
+      }
+      line { $chA $chQ $chR $chB $chK $direct_input
+      }
+      line {  $Bus_Entree_0 $Bus_Entree_1 $Bus_Entree_2 $Bus_Entree_3
+      }
+   };
+   outpanel = col {
+      line { $Z $C
+      }
+      line { $A_0 $A_1 $A_2 $A_3
+      }
+      line { $Q_0 $Q_1 $Q_2 $Q_3
+      }
+      line { $R_0 $R_1 $R_2 $R_3
+      }
+      line { $B_0 $B_1 $B_2 $B_3
+      }
+      line { $K_0 $K_1 $K_2 $K_3
+      }
+      line { $sortie_UAL_0 $sortie_UAL_1 $sortie_UAL_2 $sortie_UAL_3
+      }
+   };
+   top = line { $inpanel $outpanel
+   };

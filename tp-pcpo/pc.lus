@@ -1,10 +1,13 @@
-include "../pgcd-pcpo/memoire.lus"
+include "memoire.lus"
 
 type state = struct { char, b1, b1a, b1b, b2, b2a, b2b, b2c, b2if, b2ifa, b2ifb, done : bool };
 
 node pc (reset, On, C, Z : bool)
-returns (uc0, uc1, lsl, var1, var2, var3, chQ, chR, chA, chB, chK : bool);
-var stateC, stateN : state; -- état courant / état suivant
+returns (
+    uc0, uc1, lsl, var1, var2, var3, chQ, chR, chA, chB, chK : bool;
+    stateC : state; -- état courant
+);
+var stateN : state; -- état suivant
 let
     -- stockage de l'état
     stateC.char = bascule(stateN.char, true, false, reset);
@@ -21,29 +24,29 @@ let
     stateC.done = bascule(stateN.done, true, reset, false);
 
     -- calcul de l'état suivant
-    stateN.char = false; -- l'état suivant n'est jamais l'état initial
+    stateN.char = (stateC.char and not On);
     stateN.b1 = (stateC.char and On) or (stateC.b1b);
-    stateN.b1a = (stateC.b1 and not C and Z);
+    stateN.b1a = (stateC.b1 and C and not Z);
     stateN.b1b = (stateC.b1a);
-    stateN.b2 = (stateC.b1 and (C or not Z)) or (stateC.b2if and not C) or (stateC.b2ifb);
-    stateN.b2a = (stateC.b2 and (not C or Z));
+    stateN.b2 = (stateC.b1 and (not C or Z)) or (stateC.b2if and not C) or (stateC.b2ifb);
+    stateN.b2a = (stateC.b2 and (C and not Z));
     stateN.b2b = (stateC.b2a);
     stateN.b2c = (stateC.b2b);
     stateN.b2if = (stateC.b2c);
     stateN.b2ifa = (stateC.b2if and C);
     stateN.b2ifb = (stateC.b2ifa);
-    stateN.done = (stateC.b2 and C and not Z) or (stateC.done);
+    stateN.done = (stateC.b2 and (not C or Z)) or (stateC.done);
 
     -- calcul des sorties
-    uc0 = stateC.b1a or stateC.b2 or stateC.b2a or stateC.b2c or stateC.b2ifa;
-    uc1 = stateC.b1a or stateC.b1b or stateC.b2 or stateC.b2a or stateC.b2b or stateC.b2c;
-    lsl = stateC.b1a or stateC.b2c;
-    var1 = stateC.b1 or stateC.b1a or stateC.b1b or stateC.b2 or stateC.b2a or stateC.b2b;
-    var2 = stateC.b1b or stateC.b2 or stateC.b2b or stateC.b2if or stateC.b2ifb;
-    var3 = stateC.b1;
-    chQ = stateC.b2c or stateC.b2ifa;
-    chR = stateC.b2ifb;
+    uc0 = stateN.b1a or stateN.b2 or stateN.b2a or stateN.b2c or stateN.b2b;
+    uc1 = stateN.b1a or stateN.b1b or stateN.b2 or stateN.b2a or stateN.b2ifa or stateN.b2c;
+    lsl = stateN.b1a or stateN.b2c;
+    var1 = stateN.b1 or stateN.b1a or stateN.b1b or stateN.b2 or stateN.b2a or stateN.b2b;
+    var2 = stateN.b1b or stateN.b2 or stateN.b2b or stateN.b2if or stateN.b2ifb;
+    var3 = stateN.b1;
+    chQ = stateN.b2c or stateN.b2ifa;
+    chR = stateN.b2ifb;
     chA = false;
-    chB = stateC.b1a or stateC.b2a;
-    chK = stateC.b1b or stateC.b2b;
+    chB = stateN.b1a or stateN.b2a;
+    chK = stateN.b1b or stateN.b2b;
 tel;

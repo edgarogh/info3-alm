@@ -94,14 +94,21 @@ tel;
 
 
 ------------------------------------
-node PO <<const n :int>>  (uc0, uc1 : bool; lsl : bool; var1, var2, var3: bool; chA, chQ, chR, chB, chK : bool; Bus_Entree:bool ^n; direct_input : bool)
-	returns (Z, C :bool; A, Q, R, B, K, sortie_UAL:bool^n);
-
-	var N,V :bool;
-	var Bus_op1 : bool^n;
-	var Bus_op2 : bool^n;
-	var Bus_Resultat : bool^n;
-
+node po <<const n :int>> (
+    uc0, uc1 : bool;
+    lsl : bool;
+    var1, var2, var3 : bool;
+    chA, chQ, chR, chB, chK : bool;
+    Bus_Entree : bool^n;
+    direct_input : bool;
+) returns (
+    Z, C : bool;
+    A, Q, R, B, K, sortie_UAL : bool^n;
+);
+var N,V : bool;
+var Bus_op1 : bool^n;
+var Bus_op2 : bool^n;
+var Bus_Resultat : bool^n;
 let
 	A = registren<<n>>(Bus_Resultat, chA, false);
 	B = registren<<n>>(Bus_Resultat, chB, false);
@@ -120,4 +127,4 @@ tel;
 
 
 -- MAIN
-node po_main = PO<<4>>;
+node po_4 = po<<4>>;
