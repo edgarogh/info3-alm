@@ -26,9 +26,9 @@ let
     -- calcul de l'état suivant
     stateN.char = (stateC.char and not On);
     stateN.b1 = (stateC.char and On) or (stateC.b1b);
-    stateN.b1a = (stateC.b1 and C and not Z);
+    stateN.b1a = (stateC.b1 and (not C or Z));
     stateN.b1b = (stateC.b1a);
-    stateN.b2 = (stateC.b1 and (not C or Z)) or (stateC.b2if and not C) or (stateC.b2ifb);
+    stateN.b2 = (stateC.b1 and (C and not Z)) or (stateC.b2if and not C) or (stateC.b2ifb);
     stateN.b2a = (stateC.b2 and (C and not Z));
     stateN.b2b = (stateC.b2a);
     stateN.b2c = (stateC.b2b);
@@ -38,15 +38,20 @@ let
     stateN.done = (stateC.b2 and (not C or Z)) or (stateC.done);
 
     -- calcul des sorties
-    uc0 = stateN.b1a or stateN.b2 or stateN.b2a or stateN.b2c or stateN.b2b;
-    uc1 = stateN.b1a or stateN.b1b or stateN.b2 or stateN.b2a or stateN.b2ifa or stateN.b2c;
-    lsl = stateN.b1a or stateN.b2c;
-    var1 = stateN.b1 or stateN.b1a or stateN.b1b or stateN.b2 or stateN.b2a or stateN.b2b;
-    var2 = stateN.b1b or stateN.b2 or stateN.b2b or stateN.b2if or stateN.b2ifb;
-    var3 = stateN.b1;
-    chQ = stateN.b2c or stateN.b2ifa;
-    chR = stateN.b2ifb;
+    uc0, uc1, lsl, var1, var2, var3, chQ, chR, chA, chB, chK = pc_sorties(stateC);
+tel;
+
+function pc_sorties (s : state) returns (uc0, uc1, lsl, var1, var2, var3, chQ, chR, chA, chB, chK : bool);
+let
+    uc0 = s.b1a or s.b2 or s.b2a or s.b2c or s.b2b;
+    uc1 = s.b1a or s.b1b or s.b2 or s.b2a or s.b2ifa or s.b2c;
+    lsl = s.b1a or s.b2c;
+    var1 = s.b1 or s.b1a or s.b1b or s.b2 or s.b2a or s.b2b;
+    var2 = s.b1b or s.b2 or s.b2b or s.b2if or s.b2ifb;
+    var3 = s.b1;
+    chQ = s.b2c or s.b2ifa;
+    chR = s.b2ifb;
     chA = false;
-    chB = stateN.b1a or stateN.b2a;
-    chK = stateN.b1b or stateN.b2b;
+    chB = s.b1a or s.b2a;
+    chK = s.b1b or s.b2b;
 tel;

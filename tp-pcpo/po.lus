@@ -6,8 +6,8 @@ include "utils.lus"
 -- mux 1st operand----------------------
 function mux_1op (A,B,C,D : bool; var1,var2 : bool) returns (X : bool);
 let
-    X = (A and not var1 and not var2) 
-    or (B and not var1 and var2) 
+    X = (A and not var1 and not var2)
+    or (B and not var1 and var2)
     or (C and var1 and not var2)
     or (D and var1 and var2);
 tel;
@@ -28,7 +28,7 @@ tel;
 
 function mux_2opn <<const n : int>>(A,B : bool^n; var3 : bool) returns (X : bool^n)
 let
-    X = map <<mux_2op;n>>(A,B,var3^n); 
+    X = map <<mux_2op;n>>(A,B,var3^n);
 tel;
 -----------------------------------------
 
@@ -44,7 +44,7 @@ tel;
 
 function mux_bn <<const n : int>>(A, B, C: bool^n; lsl, uc0, uc1 : bool) returns (X : bool^n)
 let
-    X = map <<mux_3b;n>>(A,B,C,lsl^n,uc0^n,uc1^n); 
+    X = map <<mux_3b;n>>(A,B,C,lsl^n,uc0^n,uc1^n);
 tel;
 
 function mux_b <<const n : int>>(A : bool^n; lsl, uc0, uc1 : bool) returns (X : bool^n)
@@ -67,7 +67,7 @@ tel;
 
 function mux_2qn <<const n : int>>(A,B : bool^n; uc0, uc1 : bool) returns (X : bool^n)
 let
-    X = map <<mux_2q;n>>(A,B,uc0^n,uc1^n); 
+    X = map <<mux_2q;n>>(A,B,uc0^n,uc1^n);
 tel;
 
 function mux_q <<const n : int>>(A : bool^n; uc0, uc1 : bool) returns (X : bool^n)
@@ -88,7 +88,7 @@ tel;
 
 function muxfin <<const n : int>>(A, B : bool^n; cond : bool) returns (X : bool^n)
 let
-    X = map <<mux;n>>(A,B,cond^n); 
+    X = map <<mux;n>>(A,B,cond^n);
 tel;
 ------------------------------------
 
@@ -103,12 +103,12 @@ node po <<const n :int>> (
     direct_input : bool;
 ) returns (
     Z, C : bool;
-    A, Q, R, B, K, sortie_UAL : bool^n;
+    A, Q, R, B, K, Bus_Resultat : bool^n;
 );
 var N,V : bool;
 var Bus_op1 : bool^n;
 var Bus_op2 : bool^n;
-var Bus_Resultat : bool^n;
+var sortie_UAL : bool^n;
 let
 	A = registren<<n>>(Bus_Resultat, chA, false);
 	B = registren<<n>>(Bus_Resultat, chB, false);

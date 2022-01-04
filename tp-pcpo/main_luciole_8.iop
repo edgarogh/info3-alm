@@ -37,7 +37,7 @@ outputs
    Z : bool;
 panels
    inpanel = col {
-      line { $input_0 $input_1 $input_2 $input_3 
+      line { $input_0 $input_1 $input_2 $input_3
       }
       line { $input_4 $input_5 $input_6 $input_7
       }
@@ -48,9 +48,9 @@ panels
    outpanel = col {
       line { $A $Q $R $B $K
       }
-      line { $output $s_char $C $Z
+      line { $output $C $Z $s_char
       }
-      line { $s_b1 $s_b1a $s_b1b $s_b2 $s_b2a $s_b2b 
+      line { $s_b1 $s_b1a $s_b1b $s_b2 $s_b2a $s_b2b
       }
       line { $s_b2c $s_b2if $s_b2ifa $s_b2ifb $s_done
       }
